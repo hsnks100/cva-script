@@ -1,33 +1,58 @@
 %{
 #include <stdlib.h>
 void yyerror(char *);
+#include "node.h"
 #include "parser.tab.h"
 
-/* extern double yylval; */
+    /* extern double yylval; */
 
 %}
-%%
-[0-9]+ {
-    yylval.fp = atoi(yytext);
-    /* yylval =  */
 
+
+
+alpha [a-zA-Z]
+digit [0-9]
+
+%%
+for 	return FOR;
+while	return WHILE;
+if	return IF;
+else	return ELSE;
+struct 	return STRUCT;
+print return PRINT;
+printall return PRINTALL;
+^"#include ".+ ;
+"<="    return LE;
+">="    return GE;
+"=="    return EQ;
+"!="    return NE;
+">"	return GT;
+"<"	return LT;
+"."     return DOT;
+"||"					{ return OR_OP; } 
+\/\/.* ;
+
+[ \t]		;
+[ \n]   { yylineno = yylineno + 1;}
+
+{digit}+(\.{digit}+)? {
+    printf("input num = %s\n", yytext);
+    yylval.fp = atof(yytext);
     return NUMBER;
 }
-
-[+] {return PLUS;}
-[\n] {return NEWLINE;}
-= return ASSIGN;
-[a-z]+ {
-yylval.str = strdup(yytext);
-
-return ID;
+{alpha}({alpha}|{digit})* {
+    yylval.str = strdup(yytext);
+    return ID;
 }
+. {
+    /* yymore(); */
+    yyless(1);
+    return yytext[0];
+       }
 
-[ \t]   ;     /* 무시한다 */
-.       yyerror("invalid character");
 %%
 
 int yywrap(void)
 {
-  return 1;
+    return 1;
 }
