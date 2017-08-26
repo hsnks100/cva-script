@@ -66,13 +66,13 @@
 %left '<' '>' LE GE EQ NE LT GT
 %left '+' '-'
 %left '*' '/'
-%type <nPtr> statement statement_list selection_statement
+%type <nPtr> statement statement_list selection_statement iteration_statement
 %type	<nPtr> expression_statement expression 
 %type	<nPtr> compound_statement
 
 %%
 function:
-function statement         {
+function statement{
 
     klog("new ex %x\n", $2);
     ex($2, 1);
@@ -93,6 +93,7 @@ statement
 : compound_statement
 | expression_statement
 | selection_statement
+| iteration_statement
 | PRINT expression ';'                 {
     klog("opr(PRINT)\n");
     $$ = opr(PRINT, 1, $2); }
@@ -102,7 +103,9 @@ compound_statement
 : '{' '}' {
     $$ = con(1004);
 }
-| '{'  statement_list '}'
+| '{'  statement_list '}' {
+    $$ = $2;
+    }
 ;
 
 expression_statement
@@ -119,12 +122,17 @@ expression_statement
   }
 ;
 
-expression : expression '+' expression
+expression : expression '+' expression {
+    $$ = opr('+', 2, $1, $3);
+    }
 | expression '-' expression
 | expression '*' expression
 | expression '/' expression
 | expression EQ expression          {
     $$ = opr(EQ, 2, $1, $3);
+}
+| expression NE expression          {
+    $$ = opr(NE, 2, $1, $3);
 }
 | ID '=' expression {
     klog("assingn\n");
@@ -171,6 +179,13 @@ selection_statement
     $$ = opr(IF, 2, $3, $5);
   }
 ; 
+
+iteration_statement
+: WHILE '(' expression ')' statement        {
+    $$ = opr(WHILE, 2, $3, $5);
+}
+;
+
 
 %%
 #include <iostream>
@@ -287,6 +302,10 @@ resultType ex(nodeType *p, int d) {
             return ex(p->opr.op[1], d+1);
         case '=':
             return symbols[p->opr.op[0]->id.i] = ex(p->opr.op[1], d+1);
+        case '+':
+            {
+                return ex(p->opr.op[0], d + 1) + ex(p->opr.op[1], d + 1);
+            }
         case EQ:
             {
                 auto left = ex(p->opr.op[0], d+1);
@@ -297,6 +316,24 @@ resultType ex(nodeType *p, int d) {
                 else{
                     return resultType{0, ""};
                 }
+            }
+        case NE:
+            {
+                auto left = ex(p->opr.op[0], d+1);
+                auto right = ex(p->opr.op[1], d+1);
+                if(left.number == right.number && left.str == right.str) {
+                    return resultType{0, ""};
+                }
+                else{
+                    return resultType{1, ""};
+                }
+            }
+        case WHILE:
+            {
+                while(ex(p->opr.op[0], d+1).toBool()) {
+                    ex(p->opr.op[1], d+1); 
+                }
+                return resultType{0, ""};
             }
         }
 

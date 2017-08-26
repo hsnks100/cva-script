@@ -5,6 +5,13 @@ typedef enum { typeCon, typeId, typeOpr, typeConStr } nodeEnum;
 struct resultType {
   double number;
   std::string str;
+  resultType operator+(const resultType& rt) {
+    return resultType{number + rt.number, str + rt.str};
+  }
+
+  bool toBool() {
+    return number != 0 || str != "";
+  }
   
 };
 

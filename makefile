@@ -6,8 +6,8 @@ CFLAGS = -DYYDEBUG=1 -std=c++14
 all: speech
 speech: parser.tab.c lex.yy.c
 	$(CC) -o speech parser.tab.c lex.yy.c $(LIBS) $(CFLAGS)
-lex.yy.c : lexer.ll
-	                $(LEX) lexer.ll
+lex.yy.c : lexer.l
+	                $(LEX) lexer.l
 parser.tab.c: parser.y
 	                $(YACC) -d parser.y
 
