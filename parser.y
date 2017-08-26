@@ -128,11 +128,23 @@ expression : expression '+' expression {
 | expression '-' expression
 | expression '*' expression
 | expression '/' expression
+| expression LE expression          {
+    $$ = opr(LE, 2, $1, $3);
+}
+| expression GE expression          {
+    $$ = opr(GE, 2, $1, $3);
+}
 | expression EQ expression          {
     $$ = opr(EQ, 2, $1, $3);
 }
 | expression NE expression          {
     $$ = opr(NE, 2, $1, $3);
+}
+| expression GT expression          {
+    $$ = opr(GT, 2, $1, $3);
+}
+| expression LT expression          {
+    $$ = opr(LT, 2, $1, $3);
 }
 | ID '=' expression {
     klog("assingn\n");
@@ -261,15 +273,16 @@ resultType ex(nodeType *p, int d) {
     klog("ex ___ %x\n", p);
     klog("ex ___ enter\n");
     if (!p) {
-        return resultType{0, ""};
+        return resultType{resultType::NUM, 0, ""};
     }
+    klog("ex ___ p->type %d\n", p->type);
     switch(p->type) {
     case typeCon:
         /* klog("ex ___ typeCon %d\n", p->con.value); */
-        return resultType{p->con.value, ""};
+        return resultType{resultType::NUM, p->con.value, ""};
     case typeConStr:
         /* klog("ex ___ typeConStr %s\n", p->con.const_str.c_str()); */
-        return resultType{0, p->con.const_str};
+        return resultType{resultType::STR, 0, p->con.const_str};
     case typeId:
         /* klog("ex ___ typeId\n"); */
         /* return p; */
@@ -286,17 +299,19 @@ resultType ex(nodeType *p, int d) {
                     ex(p->opr.op[1], d+1);
                 else if (p->opr.nops > 2)
                     ex(p->opr.op[2], d+1);
-                return resultType{0, ""};
+                return resultType{resultType::NUM, 0, ""};
             }
         case PRINT:
             {
                 auto retType = ex(p->opr.op[0], d+1);
-                if (retType.number != 0)
+                if(retType.type == resultType::NUM) {
                     printf(">>>>>> %lf\n", retType.number);
-                if (retType.str != "")
+                }
+                else{
                     printf(">>>>>> %s\n", retType.str.c_str());
+                }
             }
-            return resultType{0, ""};
+            return resultType{resultType::NUM, 0, ""};
         case ';':
             ex(p->opr.op[0], d+1);
             return ex(p->opr.op[1], d+1);
@@ -306,15 +321,33 @@ resultType ex(nodeType *p, int d) {
             {
                 return ex(p->opr.op[0], d + 1) + ex(p->opr.op[1], d + 1);
             }
+        case LE:
+            {
+                auto left = ex(p->opr.op[0], d+1);
+                auto right = ex(p->opr.op[1], d+1);
+                if(left.str != "" || right.str != "") {
+                    yyerror("type error");
+                    }
+                return resultType{resultType::NUM, left.number <= right.number, ""};
+            }
+        case GE:
+            {
+                auto left = ex(p->opr.op[0], d+1);
+                auto right = ex(p->opr.op[1], d+1);
+                if(left.str != "" || right.str != "") {
+                    yyerror("type error");
+                    }
+                return resultType{resultType::NUM, left.number >= right.number, ""};
+            }
         case EQ:
             {
                 auto left = ex(p->opr.op[0], d+1);
                 auto right = ex(p->opr.op[1], d+1);
                 if(left.number == right.number && left.str == right.str) {
-                    return resultType{1, ""};
+                    return resultType{resultType::NUM, 1, ""};
                 }
                 else{
-                    return resultType{0, ""};
+                    return resultType{resultType::NUM, 0, ""};
                 }
             }
         case NE:
@@ -322,23 +355,41 @@ resultType ex(nodeType *p, int d) {
                 auto left = ex(p->opr.op[0], d+1);
                 auto right = ex(p->opr.op[1], d+1);
                 if(left.number == right.number && left.str == right.str) {
-                    return resultType{0, ""};
+                    return resultType{resultType::NUM, 0, ""};
                 }
                 else{
-                    return resultType{1, ""};
+                    return resultType{resultType::NUM, 1, ""};
                 }
+            }
+        case GT:
+            {
+                auto left = ex(p->opr.op[0], d+1);
+                auto right = ex(p->opr.op[1], d+1);
+                if(left.str != "" || right.str != "") {
+                    yyerror("type error");
+                    }
+                return resultType{resultType::NUM, left.number > right.number, ""};
+            }
+        case LT:
+            {
+                auto left = ex(p->opr.op[0], d+1);
+                auto right = ex(p->opr.op[1], d+1);
+                if(left.str != "" || right.str != "") {
+                    yyerror("type error");
+                    }
+                return resultType{resultType::NUM, left.number < right.number, ""};
             }
         case WHILE:
             {
                 while(ex(p->opr.op[0], d+1).toBool()) {
                     ex(p->opr.op[1], d+1); 
                 }
-                return resultType{0, ""};
+                return resultType{resultType::NUM, 0, ""};
             }
         }
 
     }
-    return resultType{0, ""};
+    return resultType{resultType::NUM, 0, ""};
 }
 void yyerror(char *s)
 {

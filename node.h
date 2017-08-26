@@ -3,14 +3,24 @@
 typedef enum { typeCon, typeId, typeOpr, typeConStr } nodeEnum;
 
 struct resultType {
+  enum {NUM, STR} type;
   double number;
   std::string str;
   resultType operator+(const resultType& rt) {
-    return resultType{number + rt.number, str + rt.str};
+    return resultType{type, number + rt.number, str + rt.str};
   }
 
   bool toBool() {
     return number != 0 || str != "";
+  }
+
+  std::string toString() {
+    if(type == NUM) {
+      return std::to_string(number); 
+    }
+    else{
+      return str;
+    }
   }
   
 };
