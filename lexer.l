@@ -1,12 +1,12 @@
 %{
 #include <stdlib.h>
-void yyerror(char *);
+    void yyerror(char *);
 #include "node.h"
 #include "parser.tab.h"
 
     /* extern double yylval; */
 
-%}
+    %}
 
 
 
@@ -17,7 +17,7 @@ digit [0-9]
 for 	return FOR;
 while	return WHILE;
 if	return IF;
-else	return ELSE;
+ else	return ELSE;
 struct 	return STRUCT;
 print return PRINT;
 printall return PRINTALL;
@@ -35,6 +35,17 @@ printall return PRINTALL;
 [ \t]		;
 [ \n]   { yylineno = yylineno + 1;}
 
+
+"\"".*"\"" {
+    /* yyless('"'); */
+    yylval.str = strndup(yytext + 1, strlen(yytext) - 2); 
+    return STRING;
+}
+. {
+    /* yymore(); */
+    yyless(1);
+    return yytext[0];
+} 
 {digit}+(\.{digit}+)? {
     /* printf("input num = %s\n", yytext); */
     yylval.fp = atof(yytext);
@@ -44,18 +55,6 @@ printall return PRINTALL;
     yylval.str = strdup(yytext);
     return ID;
        }
-
-"\"".*"\"" {
-/* yyless('"'); */
-    yylval.str = strndup(yytext + 1, strlen(yytext) - 2); 
-    return STRING;
-}
-. {
-    /* yymore(); */
-    yyless(1);
-    return yytext[0];
-}
-
 %%
 
 int yywrap(void)
