@@ -1,4 +1,6 @@
 
+#ifndef _NODE_H_
+#define _NODE_H_
 #include <string>
 typedef enum { typeCon, typeId, typeOpr, typeConStr } nodeEnum;
 
@@ -52,3 +54,6 @@ typedef struct nodeTypeTag {
     oprNodeType opr;        /* operators */
   };
 } nodeType;
+
+
+#endif
