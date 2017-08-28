@@ -32,30 +32,60 @@
 %token PRINTALL
 %token PRINT
 %token OR_OP
+%token FUNCTION_CALL FUNCTION
  /* %type <fp> NUMBER */
 %right '='
 %left '<' '>' LE GE EQ NE LT GT
 %left '+' '-'
 %left '*' '/'
 %type <nPtr> statement statement_list selection_statement iteration_statement
+%type <nPtr> decl_statement
 %type	<nPtr> expression_statement expression 
 %type	<nPtr> compound_statement
 
 %%
-function:
-function statement{
+program:
+program decl_statement{
 
-    klog("new ex %x\n", $2);
+    printf("function statement_list\n");
+    /* printf("new ex %x\n", $2); */
     ex($2, 1);
-    klog("end ex\n");
+    /* printf("end ex\n"); */
     freeNode($2); }
-| /* NULL */
+| program
+        |       
+             
+
 ;
+
+
+decl_statement
+: decl_list
+| statement_list
+;
+decl_list
+: decl_list decl {
+    printf(": decl_list decl {\n");
+}
+| decl {
+    printf(": decl\n");
+} 
+;
+
+decl
+: FUNCTION ID '(' ')' '{' statement_list '}' {
+    printf(": FUNCTION ID '(' ')' '{' statement_list '}' {\n");
+    /* $$ = opr(FUNCTION, 2, $2, $6); */
+}
+
+
 statement_list
 : statement_list statement {
+    printf("statement_list statement()\n");
     $$ = opr(';', 2, $1, $2);
 }
 | statement {
+    printf("statement(last)\n");
     $$ = $1;
   }
 ;
@@ -65,10 +95,14 @@ statement
 | expression_statement
 | selection_statement
 | iteration_statement
+| FUNCTION_CALL ID '(' ')' ';' {
+    printf("| FUNCTION_CALL ID '(' ')' ';' {\n");
+    }
 | PRINT expression ';'                 {
     klog("opr(PRINT)\n");
     $$ = opr(PRINT, 1, $2); }
 /* | iteration_statement */
+|        
 ;
 compound_statement
 : '{' '}' {

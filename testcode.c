@@ -1,3 +1,17 @@
+
+function fff() {
+    print "fff()";
+}
+function fff2() {
+    print "fff2()";
+}
+
+call fff();
+call fff2();
+
+function fffdd() {
+}
+
 i = 1;
 print "-----------------";
 while(i != 10){
@@ -7,9 +21,6 @@ while(i != 10){
   while( j <= i ) {
     str = str + "*";
     j = j + 1;
-  }
-  if( i == 3 ) {
-    print "i = 3";
   }
   i = i + 1;
   print str;

@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #define klog printf
-#define klog {}
+/* #define klog {} */
 nodeType *opr(int oper, int nops, ...);
 nodeType *id(char* i);
 nodeType *con(int value);
