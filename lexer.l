@@ -1,10 +1,12 @@
 %{
 #include <stdlib.h>
     void yyerror(char *);
-#include "node.h"
+#include "AST.h"
 #include "parser.tab.h"
 
 %}
+
+
 
 
 
@@ -17,10 +19,8 @@ while	return WHILE;
 if	return IF;
 else	return ELSE;
 struct 	return STRUCT;
-"function "	return FUNCTION;
-print return PRINT;
-printall return PRINTALL;
-"call " return FUNCTION_CALL;
+var return VAR;
+println return PRINTLN;
 ^"#include ".+ ;
 "<="    return LE;
 ">="    return GE;
@@ -28,8 +28,6 @@ printall return PRINTALL;
 "!="    return NE;
 ">"	return GT;
 "<"	return LT;
-"."     return DOT;
-"||"					{ return OR_OP; } 
 \/\/.* ;
 
 [ \t]		;
@@ -37,17 +35,17 @@ printall return PRINTALL;
 
 {digit}+(\.{digit}+)? {
     /* printf("input num = %s\n", yytext); */
-    yylval.fp = atof(yytext);
+    yylval.val = makeNum(atof(yytext));
     return NUMBER;
        }
 {alpha}({alpha}|{digit})* {
-    yylval.str = strdup(yytext);
-    return ID;
+    yylval.val = makeSymbol(yytext);
+    return SYMBOL;
        }
 
 "\"".*"\"" {
 /* yyless('"'); */
-    yylval.str = strndup(yytext + 1, strlen(yytext) - 2); 
+    yylval.val = makeStr(strndup(yytext + 1, strlen(yytext) - 2));
     return STRING;
 }
 . {
@@ -61,4 +59,10 @@ printall return PRINTALL;
 int yywrap(void)
 {
     return 1;
+}
+
+void yyerror(char*)
+{
+    printf("syntax error!\n");
+    exit(1);
 }

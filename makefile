@@ -3,14 +3,19 @@ LIBS = -lfl
 LEX = flex
 YACC = bison
 CFLAGS = -DYYDEBUG=1 -std=c++14
+
+files = parser.tab.c lex.yy.c AST.c AST.h interp.c interp_expr.c
+
+includes = $(wildcard ./*.h)
+
 all: speech
-speech: parser.tab.c lex.yy.c interp.h interp.cpp
-	$(CC) -o speech parser.tab.c lex.yy.c interp.cpp $(LIBS) $(CFLAGS)
+speech: $(files) $(includes)
+	$(CC) -o speech $(files) $(LIBS) $(CFLAGS)
 lex.yy.c : lexer.l
-	                $(LEX) lexer.l
+	$(LEX) lexer.l
 parser.tab.c: parser.y
-	                $(YACC) -d parser.y
+	$(YACC) -d parser.y
 
 
 clean: 
-	rm -rf lex.yy.c parser.tab.c parser.tab.h 
+	rm -rf *.tab.c *.tab.h lex.yy.c 

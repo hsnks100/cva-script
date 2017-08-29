@@ -1,215 +1,185 @@
 %{
     void yyerror(char *);
     int yylex(void);
-    int sym[26];
-#include "node.h"
-#include "interp.h"
 
-    bool isVoid = false;
-
+#include <stdio.h>
+#include "AST.h"
 
     /* #define printf(...) {} */
 
 %}
 
-%union {
-    long int4;              /* Constant integer value */
-    float fp;               /* Constant floating point value */
-    char *str;              /* Ptr to constant string (strings are malloc'd) */
-    nodeType *nPtr;        /* node pointer */ 
-}
-
-%token <str> ID 
-%token <str> STRING 
-
-%token	<fp>		 NUMBER
-%token SEMI
-%token FOR WHILE 
-%token IF ELSE 
-%token STRUCT 
-%token INCLUDE
-%token DOT
-%token PRINTALL
-%token PRINT
-%token OR_OP
-%token FUNCTION_CALL FUNCTION
- /* %type <fp> NUMBER */
-%right '='
-%left '<' '>' LE GE EQ NE LT GT
-%left '+' '-'
-%left '*' '/'
-%type <nPtr> statement statement_list selection_statement iteration_statement
-%type <nPtr> decl_statement
-%type	<nPtr> expression_statement expression 
-%type	<nPtr> compound_statement
-
-%%
-program:
-program decl_statement{
-
-    printf("function statement_list\n");
-    /* printf("new ex %x\n", $2); */
-    ex($2, 1);
-    /* printf("end ex\n"); */
-    freeNode($2); }
-| program
-        |       
-             
-
-;
-
-
-decl_statement
-: decl_list
-| statement_list
-;
-decl_list
-: decl_list decl {
-    printf(": decl_list decl {\n");
-}
-| decl {
-    printf(": decl\n");
-} 
-;
-
-decl
-: FUNCTION ID '(' ')' '{' statement_list '}' {
-    printf(": FUNCTION ID '(' ')' '{' statement_list '}' {\n");
-    /* $$ = opr(FUNCTION, 2, $2, $6); */
-}
-
-
-statement_list
-: statement_list statement {
-    printf("statement_list statement()\n");
-    $$ = opr(';', 2, $1, $2);
-}
-| statement {
-    printf("statement(last)\n");
-    $$ = $1;
-  }
-;
-
-statement
-: compound_statement
-| expression_statement
-| selection_statement
-| iteration_statement
-| FUNCTION_CALL ID '(' ')' ';' {
-    printf("| FUNCTION_CALL ID '(' ')' ';' {\n");
-    }
-| PRINT expression ';'                 {
-    klog("opr(PRINT)\n");
-    $$ = opr(PRINT, 1, $2); }
-/* | iteration_statement */
-|        
-;
-compound_statement
-: '{' '}' {
-    $$ = con(1004);
-}
-| '{'  statement_list '}' {
-    $$ = $2;
-    }
-;
-
-expression_statement
-: ';'{
-
-    klog("opr(;)\n");
-    $$ = opr(';', 2, NULL, NULL);
-}
-| expression ';' {
-
-    klog("expression ;\n");
-
-    $$ = $1;
-  }
-;
-
-expression : expression '+' expression {
-    $$ = opr('+', 2, $1, $3);
-    }
-| expression '-' expression
-| expression '*' expression
-| expression '/' expression
-| expression LE expression          {
-    $$ = opr(LE, 2, $1, $3);
-}
-| expression GE expression          {
-    $$ = opr(GE, 2, $1, $3);
-}
-| expression EQ expression          {
-    $$ = opr(EQ, 2, $1, $3);
-}
-| expression NE expression          {
-    $$ = opr(NE, 2, $1, $3);
-}
-| expression GT expression          {
-    $$ = opr(GT, 2, $1, $3);
-}
-| expression LT expression          {
-    $$ = opr(LT, 2, $1, $3);
-}
-| ID '=' expression {
-    klog("assingn\n");
-    /* std::cout << $3; */
-    /* symbols[$1] = $3; */
-    /* $$ = $3; */
-    auto _id = id($1);
-    klog("opr(=) %x, %x\n", _id, $3);
-    $$ = opr('=', 2, _id, $3);
-    isVoid = false; 
-  }
-| ID {
-    /* $$ = symbols[$1]; */
-    $$ = id($1);
-    klog("ID %s\n", $1);
-
-    isVoid = false;
-  }
-| NUMBER {
-    /* $$ = $1; */
-    klog("con(%d)\n", (int)$1);
-    $$ = con((int)$1);
-    /* klog("number %x\n", $$); */
-    isVoid = false;
-  }
-| STRING {
-    klog("STRING... %s\n", $1);
-    $$ = con_str($1); 
-  }
-
-| PRINTALL {
-    /* for(auto i : symbols){ */
-    /*     std::cout << i.first << " : " << i.second << std::endl; */
-    /* } */
-    isVoid = true;
-  }
-;
-
-selection_statement
-: IF '(' expression ')' statement ELSE statement {
-    $$ = opr(IF, 3, $3, $5, $7);
-}
-| IF '(' expression ')' statement {
-    $$ = opr(IF, 2, $3, $5);
-  }
-; 
-
-iteration_statement
-: WHILE '(' expression ')' statement        {
-    $$ = opr(WHILE, 2, $3, $5);
-}
-;
-
-
-%%
-
-int main(void)
-{
-    printf("------------------------------------------\n");
-    yyparse();
-    return 0;
-}
 	
+
+
+/* tiny C parser */
+%token NUMBER
+%token SYMBOL
+%token STRING
+%token VAR
+%token IF
+%token ELSE
+%token RETURN
+%token WHILE
+%token FOR
+%token PRINTLN
+%token STRUCT
+
+
+%union {
+    AST *val;
+}
+
+%right '='
+%left LE GE EQ NE GT LT
+%left '+' '-'
+%left '*'
+
+%type <val> parameter_list block local_vars symbol_list 
+%type <val> statements statement expr primary_expr arg_list
+%type <val> SYMBOL NUMBER STRING
+
+%start program
+
+%%
+
+program: /* empty */
+	| external_definitions
+	;
+
+external_definitions:
+	  external_definition
+	| external_definitions external_definition
+	;
+
+external_definition:
+	  SYMBOL parameter_list block  /* fucntion definition */
+	{ defineFunction(getSymbol($1),$2,$3); }
+	| VAR SYMBOL ';'
+	{ declareVariable(getSymbol($2),NULL); }
+	| VAR SYMBOL '=' expr ';'
+        { declareVariable(getSymbol($2),$4); }
+	| VAR SYMBOL '[' expr ']' ';'
+	{ declareArray(getSymbol($2),$4); }
+	;
+
+parameter_list:
+	 '(' ')'
+	 { $$ = NULL; }
+	| '(' symbol_list ')' 
+	 { $$ = $2; }
+	;
+
+block: '{' local_vars statements '}'
+	{ $$ = makeAST(BLOCK_STATEMENT,$2,$3); }
+	;
+
+local_vars: 
+	  /* NULL */ { $$ = NULL; }
+	| VAR symbol_list ';'
+	  { $$ = $2; }
+	;
+
+symbol_list: 
+	  SYMBOL
+	 { $$ = makeList1($1); }
+	| symbol_list ',' SYMBOL
+	 { $$ = addLast($1,$3); }
+	;
+
+statements:
+	  statement
+	 { $$ = makeList1($1); }
+	| statements statement
+	 { $$ = addLast($1,$2); }
+	;
+
+statement:
+	 expr ';'
+	 { $$ = $1; }
+	| block
+	 { $$ = $1; }
+	| IF '(' expr ')' statement
+	 { $$ = makeAST(IF_STATEMENT,$3,makeList2($5,NULL)); }
+        | IF '(' expr ')' statement ELSE statement
+	 { $$ = makeAST(IF_STATEMENT,$3,makeList2($5,$7)); }
+	| RETURN expr ';'
+	 { $$ = makeAST(RETURN_STATEMENT,$2,NULL); }
+	| RETURN ';'
+	 { $$ = makeAST(RETURN_STATEMENT,NULL,NULL); }
+	| WHILE '(' expr ')' statement
+	 { $$ = makeAST(WHILE_STATEMENT,$3,$5); }
+	| FOR '(' expr ';' expr ';' expr ')' statement
+	 { $$ = makeAST(FOR_STATEMENT,makeList3($3,$5,$7),$9); }
+	;
+
+expr: 	 primary_expr
+	| SYMBOL '=' expr
+	 { $$ = makeAST(EQ_OP,$1,$3); }
+	| SYMBOL '[' expr ']' '=' expr
+	 { $$ = makeAST(SET_ARRAY_OP,makeList2($1,$3),$6); }
+	| expr '+' expr
+	 { $$ = makeAST(PLUS_OP,$1,$3); }
+	| expr '-' expr
+	 { $$ = makeAST(MINUS_OP,$1,$3); }
+	| expr '*' expr
+	 { $$ = makeAST(MUL_OP,$1,$3); }
+	| expr LT expr
+	 { $$ = makeAST(LT_OP,$1,$3); }
+	| expr GT expr
+	 { $$ = makeAST(GT_OP,$1,$3); }
+	;
+
+primary_expr:
+	  SYMBOL
+	| NUMBER
+	| STRING
+	| SYMBOL '[' expr ']'
+	  { $$ = makeAST(GET_ARRAY_OP,$1,$3); }
+	| SYMBOL '(' arg_list ')'
+	 { $$ = makeAST(CALL_OP,$1,$3); }
+	| SYMBOL '(' ')'
+	 { $$ = makeAST(CALL_OP,$1,NULL); }
+        | '(' expr ')'
+         { $$ = $2; }  
+	| PRINTLN  '(' arg_list ')'
+	 { $$ = makeAST(PRINTLN_OP,$3,NULL); }
+	;
+
+arg_list:
+	 expr
+	 { $$ = makeList1($1); }
+	| arg_list ',' expr
+	 { $$ = addLast($1,$3); }
+	;
+
+%%
+
+
+
+
+
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include "interp.h"
+
+main()
+{
+    int r;
+    yyparse();
+
+    /* execute main */
+    printf("execute main ...\n");
+    r = executeCallFunc(lookupSymbol("main"),NULL);
+    printf("execute end ...\n");
+    return r;
+}
+
+void error(char *msg)
+{
+    fprintf(stderr,"compiler error: %s",msg);
+    exit(1);
+}
+
