@@ -8,6 +8,8 @@ Environment Env[MAX_ENV];
 jmp_buf *funcReturnEnv;
 any funcReturnVal;
 
+jmp_buf* loopControlLabel;
+
 static int executeFuncArgs(AST* params,AST* args);
 
 void defineFunction(Symbol *fsym,AST* params,AST* body)
@@ -43,7 +45,7 @@ int executeCallFunc(Symbol *f,AST* args)
     jmp_buf ret_env;
     jmp_buf *ret_env_save;
 
-    printf("function %s\n", f->name.c_str());
+    /*printf("function %s\n", f->name.c_str());*/
     nargs = executeFuncArgs(f->func_params,args);
 
     ret_env_save = funcReturnEnv;
@@ -104,6 +106,14 @@ void executeStatement(AST* p)
             executeFor(getNth(p->left,0),getNth(p->left,1),getNth(p->left,2),
                     p->right);
             break;
+        case BREAK_STATEMENT:
+            longjmp(*loopControlLabel, 1); 
+            error("break error\n");
+            break;
+        case CONTINUE_STATEMENT:
+            longjmp(*loopControlLabel, 2); 
+            error("continue error\n");
+            break;
         default:
             executeExpr(p);
     }
@@ -139,7 +149,30 @@ void executeWhile(AST* cond,AST* body)
 
 void executeFor(AST* init,AST* cond,AST* iter,AST* body)
 {
-    /* not implmented */
+    executeExpr(init);
+
+    jmp_buf loopControl, *loopControlSave; 
+
+    loopControlSave = loopControlLabel; 
+    loopControlLabel = &loopControl;
+
+
+    for(; executeExpr(cond); executeExpr(iter)) {
+        int code = setjmp(loopControl);
+        if(code != 0) {
+            if(code == 1) {
+                break;
+            }
+            if(code == 2) {
+                continue;
+            }
+        }
+        else {
+            executeStatement(body);
+        }
+    }
+
+    loopControlLabel = loopControlSave;
 }
 
 

@@ -17,11 +17,13 @@ digit [0-9]
 return return RETURN;
 for 	return FOR;
 while	return WHILE;
+break return BREAK;
+continue return CONTINUE;
 if	return IF;
 else	return ELSE;
 struct 	return STRUCT;
 var return VAR;
-println return PRINTLN; 
+print return PRINT; 
 number return TYPE_NUMBER;
 string return TYPE_STRING;
 ^"#include ".+ ;
@@ -40,6 +42,11 @@ string return TYPE_STRING;
     /* printf("input num = %s\n", yytext); */
     yylval.val = makeNum(atof(yytext));
     return NUMBER;
+}
+
+
+function {
+    return FUNCTION;
 }
 
 {alpha}({alpha}|{digit})* {

@@ -23,15 +23,18 @@ enum code {
     MUL_OP,
     LT_OP,
     GT_OP,
+    EQ_TEST_OP,
     GET_ARRAY_OP,
     SET_ARRAY_OP,
     CALL_OP,
-    PRINTLN_OP,
+    PRINT_OP,
     IF_STATEMENT,
     BLOCK_STATEMENT,
     RETURN_STATEMENT,
     WHILE_STATEMENT,
-    FOR_STATEMENT
+    FOR_STATEMENT,
+    CONTINUE_STATEMENT,
+    BREAK_STATEMENT
 };
   
 class any {

@@ -22,12 +22,15 @@
 %token RETURN
 %token WHILE
 %token FOR
-%token PRINTLN
+%token BREAK
+%token CONTINUE
+%token PRINT
 %token STRUCT
 %token SHOWALLSYMBOLS
 
 %token TYPE_NUMBER
 %token TYPE_STRING
+%token FUNCTION
 
 
 %union {
@@ -42,6 +45,7 @@
 %type <val> parameter_list block local_vars symbol_list 
 %type <val> statements statement expr primary_expr arg_list
 %type <val> SYMBOL NUMBER STRING
+%type <val> BREAK CONTINUE
 
 %start program
 
@@ -57,8 +61,8 @@ external_definitions:
 	;
 
 external_definition:
-	  SYMBOL parameter_list block  /* fucntion definition */
-	{ defineFunction(getSymbol($1),$2,$3); }
+	 FUNCTION SYMBOL parameter_list block  /* fucntion definition */
+	{ defineFunction(getSymbol($2),$3,$4); }
 
 
 	| TYPE_NUMBER SYMBOL ';'
@@ -90,7 +94,6 @@ block: '{' local_vars statements '}'
 
 local_vars: 
 	  /* NULL */ { $$ = NULL; }
-{ $$ = $2; }
 	| VAR symbol_list ';'
 	  { $$ = $2; }
 	;
@@ -122,6 +125,10 @@ statement:
 	 { $$ = makeAST(RETURN_STATEMENT,$2,NULL); }
 	| RETURN ';'
 	 { $$ = makeAST(RETURN_STATEMENT,NULL,NULL); }
+     | BREAK  ';'
+     { $$ = makeAST(BREAK_STATEMENT, NULL, NULL); }
+     | CONTINUE  ';'
+     { $$ = makeAST(CONTINUE_STATEMENT, NULL, NULL); }
 	| WHILE '(' expr ')' statement
 	 { $$ = makeAST(WHILE_STATEMENT,$3,$5); }
 	| FOR '(' expr ';' expr ';' expr ')' statement
@@ -144,6 +151,8 @@ expr: 	 primary_expr
 	 { $$ = makeAST(LT_OP,$1,$3); }
 	| expr GT expr
 	 { $$ = makeAST(GT_OP,$1,$3); }
+	| expr EQ expr
+	 { $$ = makeAST(EQ_TEST_OP,$1,$3); }
 	;
 
 primary_expr:
@@ -158,8 +167,8 @@ primary_expr:
 	 { $$ = makeAST(CALL_OP,$1,NULL); }
         | '(' expr ')'
          { $$ = $2; }  
-	| PRINTLN  '(' arg_list ')'
-	 { $$ = makeAST(PRINTLN_OP,$3,NULL); }
+	| PRINT  '(' arg_list ')'
+	 { $$ = makeAST(PRINT_OP,$3,NULL); }
 	;
 
 arg_list:

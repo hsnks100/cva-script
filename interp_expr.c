@@ -27,6 +27,8 @@ any executeExpr(AST *p)
             return executeExpr(p->left) < executeExpr(p->right);
         case GT_OP:
             return executeExpr(p->left) > executeExpr(p->right);
+        case EQ_TEST_OP:
+            return executeExpr(p->left) == executeExpr(p->right);
         case GET_ARRAY_OP:
             return getArray(getSymbol(p->left)->addr,executeExpr(p->right));
         case SET_ARRAY_OP:
@@ -35,7 +37,7 @@ any executeExpr(AST *p)
                     executeExpr(p->right));
         case CALL_OP:
             return executeCallFunc(getSymbol(p->left),p->right);
-        case PRINTLN_OP:
+        case PRINT_OP:
             printFunc(p->left);
             return (int)0;
         default:
@@ -44,17 +46,22 @@ any executeExpr(AST *p)
     }
 }
 
+std::string ReplaceAll(std::string &str, const std::string& from, const std::string& to){
+    size_t start_pos = 0; //string처음부터 검사
+    while((start_pos = str.find(from, start_pos)) != std::string::npos)  //from을 찾을 수 없을 때까지
+    {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // 중복검사를 피하고 from.length() > to.length()인 경우를 위해서
+    }
+    return str;
+}
 static void printFunc(AST *args)
 {
     AST *p;
-    p = getNth(args,0);
-    if(p->op != STR) error("not format string for println");
+    any result = executeExpr(getNth(args,0));
+    std::string t = result.toString();
 
-
-    /*printf("--------------------print!!\n");*/
-    any result = executeExpr(getNth(args,1));
-    printf(result.toString().c_str());
-    printf("\n");
+    printf(ReplaceAll(t, "\\n", "\n").c_str());
 }
 
 /*
@@ -64,7 +71,7 @@ void declareVariable(Symbol *vsym,AST *init_value, SYMBOL_TYPE st)
 {
     vsym->data.setType(st);
     if(init_value != NULL){
-        printf("%s :: %d\n", __FUNCTION__, __LINE__);
+        /*printf("%s :: %d\n", __FUNCTION__, __LINE__);*/
         vsym->data = executeExpr(init_value);
     }
 }
