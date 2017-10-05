@@ -90,6 +90,7 @@ block: '{' local_vars statements '}'
 
 local_vars: 
 	  /* NULL */ { $$ = NULL; }
+{ $$ = $2; }
 	| VAR symbol_list ';'
 	  { $$ = $2; }
 	;
