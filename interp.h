@@ -5,19 +5,23 @@
 
 typedef struct env {
     Symbol *var;
-    int val;
+    any val;
 } Environment;
 
 extern Environment Env[MAX_ENV];
 
 /* interp_expr.c */
-int executeExpr(AST *p);
+
+
+any executeExpr(AST *p);
 int getArray(int *ap, int index);
 int setArray(int *ap,int index,int value);
 
 /* interp.c */
-int  setValue(Symbol *var,int val);
-int  getValue(Symbol *var);
+any setValue(Symbol* var, any val);
+any getValue(Symbol *var);
+std::string  setValue(Symbol *var, const std::string& val);
+//std::string  getValue(Symbol *var);
 void bindEnv(int k,Symbol *var,int val);
 
 int  executeCallFunc(Symbol *f,AST *args);

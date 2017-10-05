@@ -4,12 +4,15 @@
 
 static void printFunc(AST *args);
 
-int executeExpr(AST *p)
+any executeExpr(AST *p)
 {
     if(p == NULL) return 0;
+    /*printf("p->op = %d\n", p->op);*/
     switch(p->op){
         case NUM:
             return p->val;
+        case STR:
+            return p->str;
         case SYM:
             return getValue(getSymbol(p));
         case EQ_OP:
@@ -34,8 +37,9 @@ int executeExpr(AST *p)
             return executeCallFunc(getSymbol(p->left),p->right);
         case PRINTLN_OP:
             printFunc(p->left);
-            return 0;
+            return (int)0;
         default:
+            printf("________error type %d\n", p->op);
             error("unknown operater/statement");
     }
 }
@@ -45,17 +49,23 @@ static void printFunc(AST *args)
     AST *p;
     p = getNth(args,0);
     if(p->op != STR) error("not format string for println");
-    printf(p->str,executeExpr(getNth(args,1)));
+
+
+    /*printf("--------------------print!!\n");*/
+    any result = executeExpr(getNth(args,1));
+    printf(result.toString().c_str());
     printf("\n");
 }
 
 /*
  * global variable
  */
-void declareVariable(Symbol *vsym,AST *init_value)
+void declareVariable(Symbol *vsym,AST *init_value, SYMBOL_TYPE st)
 {
+    vsym->data.setType(st);
     if(init_value != NULL){
-        vsym->val = executeExpr(init_value);
+        printf("%s :: %d\n", __FUNCTION__, __LINE__);
+        vsym->data = executeExpr(init_value);
     }
 }
 

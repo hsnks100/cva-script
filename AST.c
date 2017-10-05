@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "AST.h"
 
+
 Symbol SymbolTable[MAX_SYMBOLS];
 int n_symbols = 0;
 
@@ -13,7 +14,7 @@ AST *makeNum(int val)
     return p;
 }
 
-AST *makeStr(char *s)
+AST *makeStr(const std::string s)
 {
     AST *p;
     p = (AST *)malloc(sizeof(AST));
@@ -65,21 +66,31 @@ AST *getNext(AST *p)
 
 Symbol *lookupSymbol(char *name)
 {
+    printf("lookp!! %s\n", name);
     int i;
     Symbol *sp;
 
     sp = NULL;
     for(i = 0; i < n_symbols; i++){
-        if(strcmp(SymbolTable[i].name,name) == 0){
+        if(SymbolTable[i].name == name) {
             sp = &SymbolTable[i];
             break;
         }
     }
     if(sp == NULL){
         sp = &SymbolTable[n_symbols++];
-        sp->name = strdup(name);
+        sp->name = name;
     }
     return sp;
+}
+
+void showAllSymbols() {
+    printf("----------show all --------------\n");
+    int i;
+    for(i = 0; i < n_symbols; i++){
+        Symbol* s = &SymbolTable[i];
+        printf("%s = %d\n", s->name.c_str(), 888);
+    }
 }
 
 AST *makeSymbol(char *name)

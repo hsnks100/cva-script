@@ -41,6 +41,7 @@ string return TYPE_STRING;
     yylval.val = makeNum(atof(yytext));
     return NUMBER;
 }
+
 {alpha}({alpha}|{digit})* {
     yylval.val = makeSymbol(yytext);
     return SYMBOL;
@@ -48,13 +49,20 @@ string return TYPE_STRING;
 
 "\"".*"\"" {
 /* yyless('"'); */
-    yylval.val = makeStr(strndup(yytext + 1, strlen(yytext) - 2));
+
+    std::string cpy = yytext;
+    yylval.val = makeStr(cpy.substr(1, cpy.size() - 2)); 
+    /*strndup(yytext + 1, strlen(yytext) - 2));*/
     return STRING;
 }
 . {
     /* yymore(); */
     yyless(1);
     return yytext[0];
+}
+
+showAllSymbols; {
+    return SHOWALLSYMBOLS; 
 }
 
 %%
@@ -66,6 +74,7 @@ int yywrap(void)
 
 void yyerror(char*)
 {
-    printf("syntax error!\n");
+    printf("syntax error! line : %d\n", yylineno);
+
     exit(1);
 }

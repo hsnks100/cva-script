@@ -24,6 +24,7 @@
 %token FOR
 %token PRINTLN
 %token STRUCT
+%token SHOWALLSYMBOLS
 
 %token TYPE_NUMBER
 %token TYPE_STRING
@@ -58,12 +59,20 @@ external_definitions:
 external_definition:
 	  SYMBOL parameter_list block  /* fucntion definition */
 	{ defineFunction(getSymbol($1),$2,$3); }
-	| VAR SYMBOL ';'
-	{ declareVariable(getSymbol($2),NULL); }
+
+
 	| TYPE_NUMBER SYMBOL ';'
-	{ declareVariable(getSymbol($2),NULL); }
-	| VAR SYMBOL '=' expr ';'
-        { declareVariable(getSymbol($2),$4); }
+	{ declareVariable(getSymbol($2),NULL, SYMBOL_NUMBER); }
+
+	| TYPE_STRING SYMBOL ';'
+	{ declareVariable(getSymbol($2),NULL, SYMBOL_STRING); }
+
+	| TYPE_NUMBER SYMBOL '=' expr ';'
+        { declareVariable(getSymbol($2),$4, SYMBOL_NUMBER); }
+
+	| TYPE_STRING SYMBOL '=' expr ';'
+        { declareVariable(getSymbol($2),$4, SYMBOL_STRING); }
+
 	| VAR SYMBOL '[' expr ']' ';'
 	{ declareArray(getSymbol($2),$4); }
 	;
@@ -116,6 +125,7 @@ statement:
 	 { $$ = makeAST(WHILE_STATEMENT,$3,$5); }
 	| FOR '(' expr ';' expr ';' expr ')' statement
 	 { $$ = makeAST(FOR_STATEMENT,makeList3($3,$5,$7),$9); }
+
 	;
 
 expr: 	 primary_expr
@@ -173,6 +183,7 @@ main()
     /* execute main */
     printf("execute main ...\n");
     r = executeCallFunc(lookupSymbol("main"),NULL);
+    showAllSymbols();
     printf("execute end ...\n");
     return r;
 }

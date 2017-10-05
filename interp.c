@@ -6,11 +6,11 @@ int envp = 0;
 Environment Env[MAX_ENV];
 
 jmp_buf *funcReturnEnv;
-int funcReturnVal;
+any funcReturnVal;
 
-static int executeFuncArgs(AST *params,AST *args);
+static int executeFuncArgs(AST* params,AST* args);
 
-void defineFunction(Symbol *fsym,AST *params,AST *body)
+void defineFunction(Symbol *fsym,AST* params,AST* body)
 {
     fsym->func_params = params;
     fsym->func_body = body;
@@ -19,40 +19,37 @@ void defineFunction(Symbol *fsym,AST *params,AST *body)
 /*
  * For environment
  */
-int setValue(Symbol *var,int val)
-{
-    int i;
-    for(i = envp-1; i >= 0; i--){
-        if(Env[i].var == var){
-            Env[i].val = val;
-            return val;
-        }
-    }
-    var->val = val;
+
+any setValue(Symbol* var, any val) {
+    var->data = val;
     return val;
 }
 
-int getValue(Symbol *var)
+
+
+any getValue(Symbol *var)
 {
     int i;
     for(i = envp-1; i >= 0; i--){
         if(Env[i].var == var) return Env[i].val;
     }
-    return var->val;
+    return var->data;
 }
 
-int executeCallFunc(Symbol *f,AST *args)
+int executeCallFunc(Symbol *f,AST* args)
 {
     int nargs;
     int val;
     jmp_buf ret_env;
     jmp_buf *ret_env_save;
 
+    printf("function %s\n", f->name.c_str());
     nargs = executeFuncArgs(f->func_params,args);
 
     ret_env_save = funcReturnEnv;
-    funcReturnEnv = &ret_env;
+    funcReturnEnv = &ret_env; 
 
+    // f() { return 3; return 2; } 's expected result value is 3, but if you don't use setjmp, result value is 2;
     if(setjmp(ret_env) != 0){
         val = funcReturnVal;
     } else {
@@ -63,17 +60,15 @@ int executeCallFunc(Symbol *f,AST *args)
     return val;
 }
 
-static int executeFuncArgs(AST *params,AST *args)
+static int executeFuncArgs(AST* params,AST* args)
 {
     Symbol *var;
-    int val;
+    any val;
     int nargs;
 
     if(params == NULL) return 0;
     val = executeExpr(getFirst(args));
     var = getSymbol(getFirst(params));
-
-    // recursive
     nargs = executeFuncArgs(getNext(params),getNext(args));
     Env[envp].var = var;
     Env[envp].val = val;
@@ -81,7 +76,7 @@ static int executeFuncArgs(AST *params,AST *args)
     return nargs+1;
 }
 
-void executeReturn(AST *expr)
+void executeReturn(AST* expr)
 {
     funcReturnVal = executeExpr(expr);
     longjmp(*funcReturnEnv,1);
@@ -89,7 +84,7 @@ void executeReturn(AST *expr)
 }
 
 
-void executeStatement(AST *p)
+void executeStatement(AST* p)
 {
     if(p == NULL) return;
     switch(p->op){
@@ -114,9 +109,9 @@ void executeStatement(AST *p)
     }
 }
 
-void executeBlock(AST *local_vars,AST *statements)
+void executeBlock(AST* local_vars,AST* statements)
 {
-    AST *vars;
+    AST* vars;
     int envp_save;
 
     envp_save = envp;
@@ -128,7 +123,7 @@ void executeBlock(AST *local_vars,AST *statements)
     return;
 }
 
-void executeIf(AST *cond, AST *then_part, AST *else_part)
+void executeIf(AST* cond, AST* then_part, AST* else_part)
 {
     if(executeExpr(cond))
         executeStatement(then_part);
@@ -136,13 +131,13 @@ void executeIf(AST *cond, AST *then_part, AST *else_part)
         executeStatement(else_part);
 }
 
-void executeWhile(AST *cond,AST *body)
+void executeWhile(AST* cond,AST* body)
 {
     while(executeExpr(cond))
         executeStatement(body);
 }
 
-void executeFor(AST *init,AST *cond,AST *iter,AST *body)
+void executeFor(AST* init,AST* cond,AST* iter,AST* body)
 {
     /* not implmented */
 }
