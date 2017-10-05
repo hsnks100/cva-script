@@ -14,6 +14,7 @@ alpha [a-zA-Z]
 digit [0-9]
 
 %%
+return return RETURN;
 for 	return FOR;
 while	return WHILE;
 if	return IF;
@@ -37,11 +38,11 @@ println return PRINTLN;
     /* printf("input num = %s\n", yytext); */
     yylval.val = makeNum(atof(yytext));
     return NUMBER;
-       }
+}
 {alpha}({alpha}|{digit})* {
     yylval.val = makeSymbol(yytext);
     return SYMBOL;
-       }
+}
 
 "\"".*"\"" {
 /* yyless('"'); */

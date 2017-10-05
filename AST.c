@@ -36,8 +36,8 @@ AST *makeAST(enum code op,AST *left,AST *right)
 AST *getNth(AST *p,int nth)
 {
     if(p->op != LIST){
-	fprintf(stderr,"bad access to list\n");
-	exit(1);
+        fprintf(stderr,"bad access to list\n");
+        exit(1);
     }
     if(nth > 0) return(getNth(p->right,nth-1));
     else return p->left;
@@ -57,8 +57,8 @@ AST *addLast(AST *l,AST *p)
 AST *getNext(AST *p)
 {
     if(p->op != LIST){
-	fprintf(stderr,"bad access to list\n");
-	exit(1);
+        fprintf(stderr,"bad access to list\n");
+        exit(1);
     }
     else return p->right;
 }
@@ -70,14 +70,14 @@ Symbol *lookupSymbol(char *name)
 
     sp = NULL;
     for(i = 0; i < n_symbols; i++){
-	if(strcmp(SymbolTable[i].name,name) == 0){
-	    sp = &SymbolTable[i];
-	    break;
-	}
+        if(strcmp(SymbolTable[i].name,name) == 0){
+            sp = &SymbolTable[i];
+            break;
+        }
     }
     if(sp == NULL){
-	sp = &SymbolTable[n_symbols++];
-	sp->name = strdup(name);
+        sp = &SymbolTable[n_symbols++];
+        sp->name = strdup(name);
     }
     return sp;
 }
@@ -95,8 +95,8 @@ AST *makeSymbol(char *name)
 Symbol *getSymbol(AST *p)
 {
     if(p->op != SYM){
-	fprintf(stderr,"bad access to symbol\n");
-	exit(1);
+        fprintf(stderr,"bad access to symbol\n");
+        exit(1);
     }
     else return p->sym;
 }

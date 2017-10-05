@@ -101,7 +101,7 @@ statement:
 	 { $$ = $1; }
 	| IF '(' expr ')' statement
 	 { $$ = makeAST(IF_STATEMENT,$3,makeList2($5,NULL)); }
-        | IF '(' expr ')' statement ELSE statement
+    | IF '(' expr ')' statement ELSE statement
 	 { $$ = makeAST(IF_STATEMENT,$3,makeList2($5,$7)); }
 	| RETURN expr ';'
 	 { $$ = makeAST(RETURN_STATEMENT,$2,NULL); }
@@ -154,11 +154,6 @@ arg_list:
 	;
 
 %%
-
-
-
-
-
 
 
 #include <stdlib.h>
