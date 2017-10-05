@@ -25,6 +25,9 @@
 %token PRINTLN
 %token STRUCT
 
+%token TYPE_NUMBER
+%token TYPE_STRING
+
 
 %union {
     AST *val;
@@ -56,6 +59,8 @@ external_definition:
 	  SYMBOL parameter_list block  /* fucntion definition */
 	{ defineFunction(getSymbol($1),$2,$3); }
 	| VAR SYMBOL ';'
+	{ declareVariable(getSymbol($2),NULL); }
+	| TYPE_NUMBER SYMBOL ';'
 	{ declareVariable(getSymbol($2),NULL); }
 	| VAR SYMBOL '=' expr ';'
         { declareVariable(getSymbol($2),$4); }
