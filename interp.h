@@ -1,7 +1,7 @@
 /*
  * tiny-C interpreter header file
  */
-#define MAX_ENV 100
+#define MAX_ENV 10000
 
 typedef struct env {
     Symbol *var;

@@ -66,7 +66,6 @@ AST *getNext(AST *p)
 
 Symbol *lookupSymbol(char *name)
 {
-    printf("lookp!! %s\n", name);
     int i;
     Symbol *sp;
 

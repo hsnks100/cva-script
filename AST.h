@@ -36,7 +36,7 @@ enum code {
     CONTINUE_STATEMENT,
     BREAK_STATEMENT
 };
-  
+
 class any {
     private:
         int num;
@@ -66,18 +66,9 @@ class any {
         int getNum() const { return num; }
         std::string getStr() const { return str; }
         SYMBOL_TYPE getType() const { return type; }
-        void setType(SYMBOL_TYPE st) { this->type = st; }
-        //void set(int v) {
-            //num = v;
-            //type = SYMBOL_NUMBER;
-        //}
-        //void set(const std::string& v) {
-            //str = v;
-            //type = SYMBOL_STRING;
-        //}
-
+        void setType(SYMBOL_TYPE st) { this->type = st; } 
         any& operator=(const any& arg) {
-            
+
             if(this->type == SYMBOL_NOINIT) {
                 type = arg.getType(); 
                 num = arg.getNum();
@@ -112,31 +103,25 @@ class any {
                 return str;
             }
         }
-        //operator () { 
-            //if(type == SYMBOL_NUMBER) {
-                //return num;
-            //}
-            //else {
-                //printf("type error\n");
-            //}
-        //}
 };
-typedef struct abstract_syntax_tree {
+
+struct Symbol;
+struct AST {
     enum code op;
     int val;
-    struct symbol *sym;
-    struct abstract_syntax_tree *left,*right;
+    Symbol *sym;
+    AST *left,*right;
     std::string str;
-} AST;
+} ;
 
-typedef struct symbol {
+struct Symbol {
     std::string name;
 
     any data;
     int *addr;
     AST *func_params;
     AST *func_body;
-} Symbol;
+};
 
 #define MAX_SYMBOLS 100
 

@@ -6,10 +6,6 @@
 
 %}
 
-
-
-
-
 alpha [a-zA-Z]
 digit [0-9]
 
@@ -42,8 +38,7 @@ string return TYPE_STRING;
     /* printf("input num = %s\n", yytext); */
     yylval.val = makeNum(atof(yytext));
     return NUMBER;
-}
-
+} 
 
 function {
     return FUNCTION;
@@ -81,7 +76,6 @@ int yywrap(void)
 
 void yyerror(char*)
 {
-    printf("syntax error! line : %d\n", yylineno);
-
+    printf("syntax error! line : %d\n", yylineno); 
     exit(1);
 }
