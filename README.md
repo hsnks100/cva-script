@@ -18,6 +18,8 @@ lex(flex), yacc(bison) 을 이용하여 컴파일러 과제를 수행한다.
 
 인터넷의 tiny-c 와 yacc calculator 를 참고 했다.
 
+if, for, while, sub-program, <, >, ==, +, -, *, print 를 지원한다.
+
 # 개발환경
 
 * ubuntu 16.04
@@ -45,8 +47,6 @@ parser.y:
 AST.h/AST.c:
 
 interp_expr.c/interp.c/interp.h: 
-
-
 
 makefile: 
 
@@ -395,6 +395,16 @@ convert error!
 
 
 # 어려웠던 점 & 한계
+
+parser 를 돌리면서 트리파악은 할 수 있었는데(변수 카운팅과 같은), 파스트리를 구성하고 구성된 트리를 실행시킨다는 점에서 처음해보는 것이라 힘들었다.
+
+지금까지 해왔던 프로그래밍방식과는 너무나 달라서 적응하는데도 꽤나 오랜 시간이 걸렸던걸로 기억한다. 흐름제어를 완성시키고 sub-program 를 구현하는데에 있어서도 적지않은 고뇌의 시간을 가졌다.
+단순 구조화된 프로그래밍 방식은 그냥 루트만 실행시키면 되는건데 sub-program 은 루트에서 쭉 실행 되는 개념이 아니라 return시에 점프를 해야하거나 context 를 관리해줘야하기 때문이다.
+
+이 cva-script 의 한계로는 symbol table 이나 environment 테이블이 정적으로 선언되어있어서 프로그램이 많이 커지면 memory fault 가 날 것이다. std::stack 이나 다른 동적 container 로 구현을 바꾸거나 하면 될 것이다.
+또한, 사실상 모든 변수가 전역화되어 선언되는데 함수안에서만 변수가 선언되게 스펙을 고치고 지역변수를 stack 으로 관리하면 될 것 같다.
+
+
 
 
 

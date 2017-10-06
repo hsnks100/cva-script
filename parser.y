@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "AST.h"
 
+    extern FILE* yyin;
     /* #define printf(...) {} */
 
 %} 
@@ -75,8 +76,6 @@ external_definition:
 	| TYPE_STRING SYMBOL '=' expr ';'
         { declareVariable(getSymbol($2), $4, SYMBOL_STRING); }
 
-	| VAR SYMBOL '[' expr ']' ';'
-	{ declareArray(getSymbol($2), $4); }
 	;
 
 parameter_list:
@@ -155,8 +154,6 @@ statement:
 expr: 	 primary_expr
 	| SYMBOL '=' expr
 	 { $$ = makeAST(EQ_OP, $1, $3); }
-	| SYMBOL '[' expr ']' '=' expr
-	 { $$ = makeAST(SET_ARRAY_OP, makeList2($1, $3), $6); }
 	| expr '+' expr
 	 { $$ = makeAST(PLUS_OP, $1, $3); }
 	| expr '-' expr
@@ -201,14 +198,21 @@ arg_list:
 #include <stdio.h>
 #include "interp.h"
 
-main()
+main(int argc, char* argv[])
 {
-    int r;
+    /*int r;*/
+    /*yyparse();*/
+    FILE *fh;
+    if (argc == 2 && (fh = fopen(argv[1], "r")))
+        yyin = fh;
+    else {
+        printf("usage: ./cva-script examples/gugudan.c");
+    }
     yyparse();
 
     /* execute main */
     printf(">>>>>>>>>>>>>>>>>execute main ...\n");
-    r = executeCallFunc(lookupSymbol("main"), NULL);
+    int r = executeCallFunc(lookupSymbol("main"), NULL);
     showAllSymbols();
     printf(">>>>>>>>>>>>>>>>>execute end ...\n");
     return r;

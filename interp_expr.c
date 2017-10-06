@@ -55,7 +55,8 @@ static void printFunc(AST *args)
     any result = executeExpr(getNth(args, 0));
     std::string t = result.toString();
 
-    printf(ReplaceAll(t, "\\n", "\n").c_str());
+    t = ReplaceAll(t, "\\n", "\n").c_str();
+    printf(ReplaceAll(t, "\\t", "\t").c_str());
 }
 
 /*

@@ -12,6 +12,7 @@ enum SYMBOL_TYPE {
     SYMBOL_NUMBER,
     SYMBOL_STRING
 } ;
+
 enum code {
     LIST,
     NUM,
@@ -108,15 +109,14 @@ class any {
 struct Symbol;
 struct AST {
     enum code op;
-    int val;
     Symbol *sym;
     AST *left, *right;
     std::string str;
+    int val;
 } ;
 
 struct Symbol {
-    std::string name;
-
+    std::string name; 
     any data;
     int *addr;
     AST *func_params;

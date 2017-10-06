@@ -10,7 +10,10 @@ includes = $(wildcard ./*.h)
 
 all: speech
 speech: $(files) $(includes)
-	$(CC) -o speech $(files) $(LIBS) $(CFLAGS)
+	$(CC) -o cva-script $(files) $(LIBS) $(CFLAGS)
+
+
+
 lex.yy.c : lexer.l
 	$(LEX) lexer.l
 parser.tab.c: parser.y

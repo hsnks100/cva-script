@@ -6,7 +6,7 @@ int envp = 0;
 Environment Env[MAX_ENV];
 
 jmp_buf *funcReturnEnv;
-any funcReturnVal;
+any funcReturnVal; 
 
 jmp_buf* loopControlLabel;
 
@@ -45,13 +45,9 @@ int executeCallFunc(Symbol *f, AST* args)
     jmp_buf ret_env;
     jmp_buf *ret_env_save;
 
-    /*printf("function %s\n", f->name.c_str());*/
     nargs = executeFuncArgs(f->func_params, args);
-
     ret_env_save = funcReturnEnv;
     funcReturnEnv = &ret_env; 
-
-    // f() { return 3; return 2; } 's expected result value is 3, but if you don't use setjmp, result value is 2;
     if(setjmp(ret_env) != 0){
         val = funcReturnVal;
     } else {
@@ -154,9 +150,7 @@ void executeFor(AST* init, AST* cond, AST* iter, AST* body)
     jmp_buf loopControl, *loopControlSave; 
 
     loopControlSave = loopControlLabel; 
-    loopControlLabel = &loopControl;
-
-
+    loopControlLabel = &loopControl; 
     for(; executeExpr(cond); executeExpr(iter)) {
         int code = setjmp(loopControl);
         if(code != 0) {
