@@ -374,10 +374,28 @@ fibonacci = 13
 ```
 
 
+강타입 테스트
+```
+number num = 3;
+string str = "hello";
+function main()
+{
+    if(str == 3) {
+        print("compare");
+    }
+
+    num = "hello"; 
+}
+```
 
 
+```
+convert error!
+```
 
 
-# 어려웠던 점
+# 어려웠던 점 & 한계
+
+
 
 
