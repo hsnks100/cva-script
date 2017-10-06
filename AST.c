@@ -24,7 +24,7 @@ AST *makeStr(const std::string s)
 }
 
 
-AST *makeAST(enum code op,AST *left,AST *right)
+AST *makeAST(enum code op, AST *left, AST *right)
 {
     AST *p;
     p = (AST *)malloc(sizeof(AST));
@@ -34,31 +34,31 @@ AST *makeAST(enum code op,AST *left,AST *right)
     return p;
 }
 
-AST *getNth(AST *p,int nth)
+AST *getNth(AST *p, int nth)
 {
     if(p->op != LIST){
-        fprintf(stderr,"bad access to list\n");
+        fprintf(stderr, "bad access to list\n");
         exit(1);
     }
-    if(nth > 0) return(getNth(p->right,nth-1));
+    if(nth > 0) return(getNth(p->right, nth-1));
     else return p->left;
 }
 
-AST *addLast(AST *l,AST *p)
+AST *addLast(AST *l, AST *p)
 {
     AST *q;
 
-    if(l == NULL) return makeAST(LIST,p,NULL);
+    if(l == NULL) return makeAST(LIST, p, NULL);
     q = l;
     while(q->right != NULL) q = q->right;
-    q->right = makeAST(LIST,p,NULL);
+    q->right = makeAST(LIST, p, NULL);
     return l;
 }
 
 AST *getNext(AST *p)
 {
     if(p->op != LIST){
-        fprintf(stderr,"bad access to list\n");
+        fprintf(stderr, "bad access to list\n");
         exit(1);
     }
     else return p->right;
@@ -88,7 +88,7 @@ void showAllSymbols() {
     int i;
     for(i = 0; i < n_symbols; i++){
         Symbol* s = &SymbolTable[i];
-        printf("%s = %d\n", s->name.c_str(), 888);
+        printf("%s = %d\n",  s->name.c_str(), 888);
     }
 }
 
@@ -105,7 +105,7 @@ AST *makeSymbol(char *name)
 Symbol *getSymbol(AST *p)
 {
     if(p->op != SYM){
-        fprintf(stderr,"bad access to symbol\n");
+        fprintf(stderr, "bad access to symbol\n");
         exit(1);
     }
     else return p->sym;

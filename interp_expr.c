@@ -16,7 +16,7 @@ any executeExpr(AST *p)
         case SYM:
             return getValue(getSymbol(p));
         case EQ_OP:
-            return setValue(getSymbol(p->left),executeExpr(p->right));
+            return setValue(getSymbol(p->left), executeExpr(p->right));
         case PLUS_OP:
             return executeExpr(p->left) + executeExpr(p->right);
         case MINUS_OP:
@@ -29,14 +29,8 @@ any executeExpr(AST *p)
             return executeExpr(p->left) > executeExpr(p->right);
         case EQ_TEST_OP:
             return executeExpr(p->left) == executeExpr(p->right);
-        case GET_ARRAY_OP:
-            return getArray(getSymbol(p->left)->addr,executeExpr(p->right));
-        case SET_ARRAY_OP:
-            return setArray(getSymbol(getNth(p->left,0))->addr,
-                    executeExpr(getNth(p->left,1)),
-                    executeExpr(p->right));
         case CALL_OP:
-            return executeCallFunc(getSymbol(p->left),p->right);
+            return executeCallFunc(getSymbol(p->left), p->right);
         case PRINT_OP:
             printFunc(p->left);
             return (int)0;
@@ -58,7 +52,7 @@ std::string ReplaceAll(std::string &str, const std::string& from, const std::str
 static void printFunc(AST *args)
 {
     AST *p;
-    any result = executeExpr(getNth(args,0));
+    any result = executeExpr(getNth(args, 0));
     std::string t = result.toString();
 
     printf(ReplaceAll(t, "\\n", "\n").c_str());
@@ -67,7 +61,7 @@ static void printFunc(AST *args)
 /*
  * global variable
  */
-void declareVariable(Symbol *vsym,AST *init_value, SYMBOL_TYPE st)
+void declareVariable(Symbol *vsym, AST *init_value, SYMBOL_TYPE st)
 {
     vsym->data.setType(st);
     if(init_value != NULL){
@@ -75,24 +69,4 @@ void declareVariable(Symbol *vsym,AST *init_value, SYMBOL_TYPE st)
         vsym->data = executeExpr(init_value);
     }
 }
-
-/* 
- * Array
- */
-void declareArray(Symbol *a, AST *size)
-{
-    a->addr = (int*)malloc(sizeof(int)*executeExpr(size));
-}
-
-int getArray(int *ap, int index)
-{
-    return ap[index];
-}
-
-int setArray(int *ap,int index,int value)
-{
-    ap[index] = value;
-    return value;
-}
-
 

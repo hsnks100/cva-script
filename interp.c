@@ -10,9 +10,9 @@ any funcReturnVal;
 
 jmp_buf* loopControlLabel;
 
-static int executeFuncArgs(AST* params,AST* args);
+static int executeFuncArgs(AST* params, AST* args);
 
-void defineFunction(Symbol *fsym,AST* params,AST* body)
+void defineFunction(Symbol *fsym, AST* params, AST* body)
 {
     fsym->func_params = params;
     fsym->func_body = body;
@@ -38,7 +38,7 @@ any getValue(Symbol *var)
     return var->data;
 }
 
-int executeCallFunc(Symbol *f,AST* args)
+int executeCallFunc(Symbol *f, AST* args)
 {
     int nargs;
     int val;
@@ -46,7 +46,7 @@ int executeCallFunc(Symbol *f,AST* args)
     jmp_buf *ret_env_save;
 
     /*printf("function %s\n", f->name.c_str());*/
-    nargs = executeFuncArgs(f->func_params,args);
+    nargs = executeFuncArgs(f->func_params, args);
 
     ret_env_save = funcReturnEnv;
     funcReturnEnv = &ret_env; 
@@ -62,7 +62,7 @@ int executeCallFunc(Symbol *f,AST* args)
     return val;
 }
 
-static int executeFuncArgs(AST* params,AST* args)
+static int executeFuncArgs(AST* params, AST* args)
 {
     Symbol *var;
     any val;
@@ -71,7 +71,7 @@ static int executeFuncArgs(AST* params,AST* args)
     if(params == NULL) return 0;
     val = executeExpr(getFirst(args));
     var = getSymbol(getFirst(params));
-    nargs = executeFuncArgs(getNext(params),getNext(args));
+    nargs = executeFuncArgs(getNext(params), getNext(args));
     Env[envp].var = var;
     Env[envp].val = val;
     envp++;
@@ -81,7 +81,7 @@ static int executeFuncArgs(AST* params,AST* args)
 void executeReturn(AST* expr)
 {
     funcReturnVal = executeExpr(expr);
-    longjmp(*funcReturnEnv,1);
+    longjmp(*funcReturnEnv, 1);
     error("longjmp failed!\n");
 }
 
@@ -91,23 +91,23 @@ void executeStatement(AST* p)
     if(p == NULL) return;
     switch(p->op){
         case BLOCK_STATEMENT:
-            executeBlock(p->left,p->right);
+            executeBlock(p->left, p->right);
             break;
         case RETURN_STATEMENT:
             executeReturn(p->left);
             break;
         case IF_STATEMENT:
-            executeIf(p->left,getNth(p->right,0),getNth(p->right,1));
+            executeIf(p->left, getNth(p->right, 0), getNth(p->right, 1));
             break;
         case WHILE_STATEMENT:
-            executeWhile(p->left,p->right);
+            executeWhile(p->left, p->right);
             break;
         case FOR_STATEMENT:
-            executeFor(getNth(p->left,0),getNth(p->left,1),getNth(p->left,2),
+            executeFor(getNth(p->left, 0), getNth(p->left, 1), getNth(p->left, 2),
                     p->right);
             break;
         case BREAK_STATEMENT:
-            longjmp(*loopControlLabel, 1); 
+            longjmp(*loopControlLabel,  1); 
             error("break error\n");
             break;
         case CONTINUE_STATEMENT:
@@ -119,7 +119,7 @@ void executeStatement(AST* p)
     }
 }
 
-void executeBlock(AST* local_vars,AST* statements)
+void executeBlock(AST* local_vars, AST* statements)
 {
     AST* vars;
     int envp_save;
@@ -141,13 +141,13 @@ void executeIf(AST* cond, AST* then_part, AST* else_part)
         executeStatement(else_part);
 }
 
-void executeWhile(AST* cond,AST* body)
+void executeWhile(AST* cond, AST* body)
 {
     while(executeExpr(cond))
         executeStatement(body);
 }
 
-void executeFor(AST* init,AST* cond,AST* iter,AST* body)
+void executeFor(AST* init, AST* cond, AST* iter, AST* body)
 {
     executeExpr(init);
 

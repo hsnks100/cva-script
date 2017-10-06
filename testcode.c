@@ -37,8 +37,10 @@ function printTriangle() {
 } 
 
 function main()
-{
-
+{ 
+    number local1;
+    number local2;
+    string local3;
     print(5);
     print("\n");
     print(fibo(10));

@@ -110,7 +110,7 @@ struct AST {
     enum code op;
     int val;
     Symbol *sym;
-    AST *left,*right;
+    AST *left, *right;
     std::string str;
 } ;
 
@@ -137,19 +137,19 @@ void showAllSymbols();
 
 AST *makeNum(int val);
 AST *makeStr(const std::string s);
-AST *makeAST(enum code op,AST *right,AST *left);
+AST *makeAST(enum code op, AST *right, AST *left);
 
-AST *getNth(AST *p,int nth);
+AST *getNth(AST *p, int nth);
 AST *getNext(AST *p);
-AST *addLast(AST *l,AST *p);
+AST *addLast(AST *l, AST *p);
 
-#define getFirst(p) getNth(p,0)
-#define makeList1(x1) makeAST(LIST,x1,NULL)
-#define makeList2(x1,x2) makeAST(LIST,x1,makeAST(LIST,x2,NULL))
-#define makeList3(x1,x2,x3) makeAST(LIST,x1,makeAST(LIST,x2,makeAST(LIST,x3,NULL)))
+#define getFirst(p) getNth(p, 0)
+#define makeList1(x1) makeAST(LIST, x1, NULL)
+#define makeList2(x1, x2) makeAST(LIST, x1, makeAST(LIST, x2, NULL))
+#define makeList3(x1, x2, x3) makeAST(LIST, x1, makeAST(LIST, x2, makeAST(LIST, x3, NULL)))
 
 /* prototype for interface from parser to interpreter/compiler */
-void defineFunction(Symbol *fsym,AST *params,AST *body);
-void declareVariable(Symbol *vsym,AST *init_value, SYMBOL_TYPE st);
-void declareArray(Symbol *asym,AST *size);
+void defineFunction(Symbol *fsym, AST *params, AST *body);
+void declareVariable(Symbol *vsym, AST *init_value, SYMBOL_TYPE st);
+void declareArray(Symbol *asym, AST *size);
 
